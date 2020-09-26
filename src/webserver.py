@@ -1,82 +1,77 @@
-#!/mnt/LinuxHome/tanmay/MyLearning/learn_matplotlib/bin/python
+#!/usr/bin/env python
 
 from __future__ import print_function # adds compatibility to python 2
 from __future__ import unicode_literals
 
 import sys
-reload(sys)
 import logging
-logging.basicConfig(level=logging.INFO)
 import web
 import json
 import numpy as np  # useful for many scientific computing in Python
 import pandas as pd # primary data structure library
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import xlrd
 import os
 
+reload(sys)
+logging.basicConfig(filename='CovidPlot.log',level=logging.INFO)
+web.config.debug = False
 
-def loadCoronaDataFile(country):
-    print("Country to be loaded from datafile: " + country)
-    df_corona = pd.read_csv('../data/corona_Tracker_30-04-2020.csv')
-    df_corona.drop(['FIPS','Admin2', 'Last_Update','Province_State','Lat', 'Long_', 'Combined_Key', 'Confirmed'], axis=1, inplace=True)
+def plotBarChart(country,chartType):
+    logging.info("Country to be loaded from datafile : " + country)
+    df_corona = pd.read_csv('../data/corona_Tracker_09-24-2020.csv')
+    df_corona.drop(['FIPS','Admin2', 'Last_Update','Province_State','Lat', 'Long_', 'Combined_Key', 'Confirmed','Incidence_Rate','Case-Fatality_Ratio'], axis=1, inplace=True)
     df_corona.set_index('Country_Region', inplace=True)
     df_country = df_corona.loc[country]
-    return df_country
-
-
-def plotBarChart(df_country,countryName):
-    df_country.plot(kind='bar', figsize=(10, 6))
-    plt.xlabel('Year') # add to x-label to the plot
+    df_country.plot(kind=chartType, figsize=(7, 6))
+    plt.xlabel('Category') # add to x-label to the plot
+    plt.xticks(rotation=None)
     plt.ylabel('Number of Patients') # add y-label to the plot
-    plt.title(countryName + ' Corona Status') # add title to the plot
-    plt.legend()
-    fileName =  'Corona_BarChart.png'
-    print("FIleName of Saved file"+ fileName)
-    #os.remove('images/'+fileName)
+    plt.title(country + ' Corona Status') # add title to the plot
+    #plt.legend()
+    fileName =  country +'_Corona_'+chartType+'_Chart.png'
+    logging.info("FileName of Saved file :"+ fileName)
     plt.savefig('images/'+fileName)
-
-
+    plt.close();
+    del df_corona
+    del df_country
+    del country
+    return fileName
 
 urls = ("/", "Index", "/(.*)" ,"ImageDisplay")
         
-
-render = web.template.frender('tutorial.html')
-#app = web.application(urls, globals())
-#my_form = web.form.Form(web.form.Textbox('', class_='textfield', id='textfield'),)
-
+render = web.template.frender('plot.html')
 
 class Index(object):
     # In the browser, this displays "Index", but also causes the error on the server side.
     def GET(self):
-        #form = my_form()
-        return render()
-
-    # Doesn't do anything, but causes the error
-    def POST(self):
-        data = web.data()
-        web.header('Content-Type', 'application/text')
-        #result  = data;
-        result = json.loads(data)
-        logging.info("[Server] Index " + json.dumps(result))
-        country =result["message"] 
-        logging.info("[Server] Value " + country)
-        df_country = loadCoronaDataFile(country)
-        print ("Country Selected" + country)
-        plotBarChart(df_country, country)
-        fileName= "Corona_BarChart.png"
-        print ("Filename to be retured" + fileName)
         return render()
 
 
 class ImageDisplay(object):
-    def GET(self,fileName):
-        if(fileName is None):
-            fileName='Corona_BarChart.png'
-        imageBinary = open("./images/"+fileName,'rb').read()
-        return imageBinary
-
+    def GET(self,country):
+        if (country == 'favicon.ico'):
+            pass
+        else:
+            user_data = web.input(ctype=None)
+            
+            if user_data.ctype is None:
+                logging.info("No params passed")
+                chartType="bar"  #default type
+            else:
+                logging.info("Chart Type " + user_data.ctype)
+                chartType = user_data.ctype
+            
+            logging.info("[New Server] Value " + country)
+            logging.info("[New Chart Type] Value " + chartType)
+            fileName= plotBarChart(country,chartType)
+            imageBinary = open("./images/"+fileName,'rb').read()
+            del fileName
+            del country
+            return imageBinary
+            
 
 if __name__ == "__main__":
     logging.info("[Server] Starting server.")
