@@ -16,11 +16,11 @@ import xlrd
 import os
 
 reload(sys)
-logging.basicConfig(filename='CovidPlot.log',level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s %(message)s',filename='./logs/CovidPlot.log',level=logging.INFO)
 web.config.debug = False
 
 def plotBarChart(country,chartType):
-    logging.info("Country to be loaded from datafile : " + country)
+    logging.info("[Country] " + country)
     df_corona = pd.read_csv('../data/corona_Tracker_09-24-2020.csv')
     df_corona.drop(['FIPS','Admin2', 'Last_Update','Province_State','Lat', 'Long_', 'Combined_Key', 'Confirmed','Incidence_Rate','Case-Fatality_Ratio'], axis=1, inplace=True)
     df_corona.set_index('Country_Region', inplace=True)
@@ -32,7 +32,7 @@ def plotBarChart(country,chartType):
     plt.title(country + ' Corona Status') # add title to the plot
     #plt.legend()
     fileName =  country +'_Corona_'+chartType+'_Chart.png'
-    logging.info("FileName of Saved file :"+ fileName)
+    logging.info("[FileName] "+ fileName)
     plt.savefig('images/'+fileName)
     plt.close();
     del df_corona
@@ -42,7 +42,7 @@ def plotBarChart(country,chartType):
 
 urls = ("/", "Index", "/(.*)" ,"ImageDisplay")
         
-render = web.template.frender('plot.html')
+render = web.template.frender('./static/plot.html')
 
 class Index(object):
     # In the browser, this displays "Index", but also causes the error on the server side.
@@ -61,11 +61,11 @@ class ImageDisplay(object):
                 logging.info("No params passed")
                 chartType="bar"  #default type
             else:
-                logging.info("Chart Type " + user_data.ctype)
+                logging.info("[ChartType] " + user_data.ctype)
                 chartType = user_data.ctype
             
-            logging.info("[New Server] Value " + country)
-            logging.info("[New Chart Type] Value " + chartType)
+            logging.info("[Server] " + country)
+            logging.info("[ChartType] " + chartType)
             fileName= plotBarChart(country,chartType)
             imageBinary = open("./images/"+fileName,'rb').read()
             del fileName
