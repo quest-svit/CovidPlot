@@ -1,4 +1,4 @@
-COVID PLOT
+# COVID PLOT
 
 Corona Tracker Python App
 
@@ -10,12 +10,23 @@ It can plot different Plots like - Bar Chart, Pie Chart, Horizontal Bar Chart, B
 It uses data from Johns Hopkins University CSSE Data at
 https://github.com/CSSEGISandData/COVID-19
 
-How to use?
+
+## Python Version:
+* Python 2.7.17
+* Python 3.6.9
+
+## Python Libraries
+* Pandas
+* Numpy
+* Matplotlib
+* Web.py  
+
+## How to use?
 1. Download the data file from the above github repository for the date you want to plot.
 2. Save it in the data folder
 3. Edit the name of the file -
     pd.read_csv('../data/corona_Tracker_09-24-2020.csv')
 4. Run from the src folder
-    python webserver.py
-5. Open webbrowser
-    http://0.0.0.0:8080/
+    `python webserver.py`
+5. Open web-browser
+    `http://0.0.0.0:8080/`

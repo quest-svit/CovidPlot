@@ -14,8 +14,15 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import xlrd
 import os
+import importlib
 
-reload(sys)
+if sys.version_info < (3, 0):
+    # python 2 compatible function
+    reload(sys)
+else:
+    # python 3 compatible function
+    importlib.reload(sys) 
+
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s %(message)s',filename='./logs/CovidPlot.log',level=logging.INFO)
 web.config.debug = False
 
